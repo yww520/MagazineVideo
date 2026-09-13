@@ -1,0 +1,16 @@
+.DS_Store
+node_modules/
+dist/
+.env
+data/jobs/
+data/xhs-profile/
+data/dy-profile/
+videos/*
+!videos/.gitkeep
+web/dist/
+*.log
+.remotion/
+.vscode/
+t-probe.cjs
+probe.cjs
+probe2.cjs

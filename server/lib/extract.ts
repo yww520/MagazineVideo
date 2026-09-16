@@ -99,7 +99,7 @@ ${gaps
     { label: '补全漏掉的分段' },
   );
 
-  return normalizeSegments([...(segments as LlmAnalysis['segments']), ...(raw.segments || [])]);
+  return normalizeSegments([...(segments || []), ...(raw.segments || [])]);
 };
 
 export const extractAnalysis = async (url: string, meta: PreviewMeta): Promise<Analysis> => {

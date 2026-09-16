@@ -7,14 +7,23 @@ const nodeMajor = () => {
   return m ? Number(m[1]) : 0;
 };
 
-export const youtubeFlags = (playerClient = 'default,-web_safari') => {
+export const youtubeFlags = (playerClient?: string) => {
   const flags = ['--no-update', '--no-playlist', '--remote-components', 'ejs:github'];
-  if (which('deno')) flags.push('--js-runtimes', 'deno');
-  if (which('node') && nodeMajor() >= 22) flags.push('--js-runtimes', 'node');
-  flags.push('--extractor-args', `youtube:player_client=${playerClient}`);
+  if (which('node')) {
+    flags.push('--no-js-runtimes', '--js-runtimes', 'node');
+  } else if (which('deno')) {
+    flags.push('--js-runtimes', 'deno');
+  }
+  if (playerClient) {
+    flags.push('--extractor-args', `youtube:player_client=${playerClient}`);
+  }
   const cookies = process.env.YTDLP_COOKIES;
   if (cookies) flags.push('--cookies', cookies);
   const browser = process.env.YTDLP_COOKIES_FROM_BROWSER;
   if (browser) flags.push('--cookies-from-browser', browser);
+  const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.all_proxy;
+  if (proxy && !flags.includes('--proxy')) {
+    flags.push('--proxy', proxy);
+  }
   return flags;
 };

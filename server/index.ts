@@ -255,8 +255,17 @@ const runAnalyze = async (id: string) => {
 
 const restored = loadPersistedJobs();
 
+const webDist = join(ROOT, 'web', 'dist');
+if (existsSync(webDist)) {
+  app.use(express.static(webDist));
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.sendFile(join(webDist, 'index.html'));
+  });
+}
+
 app.listen(PORT, () => {
-  console.log(`Magazine Video API  http://127.0.0.1:${PORT}`);
+  console.log(`Magazine Video Web & API  http://127.0.0.1:${PORT}`);
   console.log(`LLM 就绪: ${process.env.LLM_API_KEY ? '是' : '否'}`);
   console.log(`刊库回载: ${restored} 条任务`);
 });

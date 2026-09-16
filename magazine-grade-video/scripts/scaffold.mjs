@@ -44,10 +44,17 @@ const STYLE_ALIASES = {
 const DEFAULT_STYLE = 'warm-editorial';
 
 const findWorkspace = (start) => {
+  if (process.env.MAGAZINE_VIDEO_WORKSPACE && existsSync(join(process.env.MAGAZINE_VIDEO_WORKSPACE, 'package.json'))) {
+    return resolve(process.env.MAGAZINE_VIDEO_WORKSPACE);
+  }
   let dir = start;
   for (let i = 0; i < 8; i++) {
     if (existsSync(join(dir, 'package.json')) && existsSync(join(dir, 'videos'))) return dir;
     dir = resolve(dir, '..');
+  }
+  const fallback = '/Users/clawbot/AI/MagazineVideo';
+  if (existsSync(join(fallback, 'package.json')) && existsSync(join(fallback, 'videos'))) {
+    return fallback;
   }
   throw new Error('Could not find Remotion workspace (package.json + videos/)');
 };

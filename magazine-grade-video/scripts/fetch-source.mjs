@@ -128,15 +128,24 @@ const nodeMajor = () => {
   return m ? Number(m[1]) : 0;
 };
 
-const youtubeFlags = (playerClient = 'default,-web_safari') => {
+const youtubeFlags = (playerClient = null) => {
   const flags = ['--no-update', '--no-playlist', '--remote-components', 'ejs:github'];
-  if (which('deno')) flags.push('--js-runtimes', 'deno');
-  if (which('node') && nodeMajor() >= 22) flags.push('--js-runtimes', 'node');
-  flags.push('--extractor-args', `youtube:player_client=${playerClient}`);
+  if (which('node')) {
+    flags.push('--no-js-runtimes', '--js-runtimes', 'node');
+  } else if (which('deno')) {
+    flags.push('--js-runtimes', 'deno');
+  }
+  if (playerClient) {
+    flags.push('--extractor-args', `youtube:player_client=${playerClient}`);
+  }
   const cookies = process.env.YTDLP_COOKIES;
   if (cookies) flags.push('--cookies', cookies);
   const browser = process.env.YTDLP_COOKIES_FROM_BROWSER;
   if (browser) flags.push('--cookies-from-browser', browser);
+  const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.all_proxy;
+  if (proxy && !flags.includes('--proxy')) {
+    flags.push('--proxy', proxy);
+  }
   return flags;
 };
 
@@ -175,8 +184,8 @@ if (manualLang) {
 const downloadVideo = () => {
   const attempts = [
     {
-      label: 'default 客户端 1080p',
-      client: 'default,-web_safari',
+      label: '智能客户端 1080p (推荐)',
+      client: null,
       args: [
         '-f',
         'bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
@@ -185,8 +194,8 @@ const downloadVideo = () => {
       ],
     },
     {
-      label: 'tv/ios 客户端 1080p',
-      client: 'tv,tv_embedded,ios,web',
+      label: 'Android/Web 客户端 1080p',
+      client: 'android,web',
       args: [
         '-f',
         'bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
@@ -195,9 +204,14 @@ const downloadVideo = () => {
       ],
     },
     {
-      label: '任意可用格式',
-      client: 'default',
-      args: ['-f', 'b', '--merge-output-format', 'mp4'],
+      label: '降级通用格式 (自适应最高画质)',
+      client: null,
+      args: [
+        '-f',
+        'bestvideo+bestaudio/best',
+        '--merge-output-format',
+        'mp4',
+      ],
     },
   ];
   let lastErr = null;

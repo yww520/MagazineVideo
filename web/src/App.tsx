@@ -19,8 +19,8 @@ export function App() {
   const [logs, setLogs] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [whole, setWhole] = useState(true);
-  const [picked, setPicked] = useState<number[]>([]);
+  const [whole, setWhole] = useState(false);
+  const [picked, setPicked] = useState<number[]>([0]);
   const [style, setStyle] = useState<StyleId>('warm-editorial');
   const [masthead, setMasthead] = useState<Masthead>({
     title: '',
@@ -33,7 +33,7 @@ export function App() {
   const view = route.page === 'video' ? route.view : 'home';
   const analysis = job?.analysis;
   const selection: Selection = useMemo(
-    () => (whole || !picked.length ? { type: 'full' } : { type: 'segments', ids: picked }),
+    () => (whole ? { type: 'full' } : { type: 'segments', ids: picked.length ? picked : [0] }),
     [whole, picked],
   );
 

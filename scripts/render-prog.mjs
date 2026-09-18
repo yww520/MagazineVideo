@@ -53,7 +53,8 @@ const main = async () => {
     serveUrl,
     codec: 'h264',
     outputLocation: outFile,
-    concurrency: 3,
+    concurrency: 4,
+    timeoutInMilliseconds: 180000,
     overwrite: true,
     imageFormat: 'jpeg',
     onProgress: ({ progress }) => {

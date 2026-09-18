@@ -46,27 +46,43 @@ export function Wrap({
       <label className="seg-pick">
         <input type="checkbox" checked={whole} onChange={onToggleWhole} />
         <span>
-          <h3>整个视频</h3>
+          <h3>
+            整个视频（完整全片）
+            {analysis.durationSec > 300 && (
+              <span style={{ color: '#e11d48', fontSize: '12px', marginLeft: '8px', fontWeight: 'normal' }}>
+                ⚠️ 视频长达 {Math.round(analysis.durationSec / 60)} 分钟，包含约 {Math.round(analysis.durationSec * 30 / 1000)}k 帧逐帧渲染需数小时，强烈建议取消并改勾下方切片
+              </span>
+            )}
+          </h3>
           <span className="time">0:00–{fmtClock(analysis.durationSec)}</span>
         </span>
       </label>
 
-      {analysis.segments.map((seg, i) => (
-        <label className="seg-pick" key={`${seg.title}-${i}`}>
-          <input
-            type="checkbox"
-            disabled={noCaps}
-            checked={!whole && picked.includes(i)}
-            onChange={() => onToggleSeg(i)}
-          />
-          <span>
-            <h3>{seg.title}</h3>
-            <span className="time">
-              {fmtClock(seg.startSec)}–{fmtClock(seg.endSec)}
+      {analysis.segments.map((seg, i) => {
+        const segDur = seg.endSec - seg.startSec;
+        const estMin = Math.max(1, Math.round((segDur / 60) * 1.5));
+        return (
+          <label className="seg-pick" key={`${seg.title}-${i}`}>
+            <input
+              type="checkbox"
+              disabled={noCaps}
+              checked={!whole && picked.includes(i)}
+              onChange={() => onToggleSeg(i)}
+            />
+            <span>
+              <h3>
+                {seg.title}
+                <span style={{ color: '#059669', fontSize: '12px', marginLeft: '8px', fontWeight: 'normal' }}>
+                  ✓ 推荐切片（{fmtClock(segDur)}，预计出片约 {estMin} 分钟）
+                </span>
+              </h3>
+              <span className="time">
+                {fmtClock(seg.startSec)}–{fmtClock(seg.endSec)}
+              </span>
             </span>
-          </span>
-        </label>
-      ))}
+          </label>
+        );
+      })}
 
       <div className="section">
         <h2>刊头四项</h2>

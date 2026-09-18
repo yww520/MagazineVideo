@@ -25,6 +25,21 @@ export function Home() {
 
   useEffect(() => {
     void load();
+    const params = new URLSearchParams(window.location.search);
+    const qUrl = params.get('url');
+    if (qUrl) {
+      setUrl(qUrl);
+      if (params.get('auto') === '1') {
+        setBusy(true);
+        void analyze(qUrl.trim())
+          .then((res) => {
+            if (res.reused && res.job.analysis) go({ page: 'video', jobId: res.jobId, view: 'wrap' });
+            else go({ page: 'video', jobId: res.jobId, view: 'analyzing' });
+          })
+          .catch((err) => setError((err as Error).message))
+          .finally(() => setBusy(false));
+      }
+    }
   }, []);
 
   const startAnalyze = async () => {

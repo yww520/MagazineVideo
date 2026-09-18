@@ -106,6 +106,27 @@ export function App() {
     });
   }, [jobId]);
 
+  useEffect(() => {
+    if (!analysis) return;
+    setMasthead((prev) => {
+      const hasAny = prev.title || prev.kicker || prev.source || prev.footerRight;
+      if (hasAny) return prev;
+      if (job?.masthead && (job.masthead.title || job.masthead.kicker)) {
+        return job.masthead;
+      }
+      let title = analysis.titleZh || analysis.originalTitle || '';
+      if (picked.length === 1 && analysis.segments[picked[0]]) {
+        title = analysis.segments[picked[0]].title;
+      }
+      return {
+        title: title.slice(0, 24),
+        kicker: analysis.originalTitle || '',
+        source: analysis.channel || 'Podcast',
+        footerRight: job?.url || '',
+      };
+    });
+  }, [analysis, job?.url, job?.masthead, picked]);
+
   const openWrap = async () => {
     if (!jobId) return;
     setError('');

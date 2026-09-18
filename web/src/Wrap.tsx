@@ -33,6 +33,25 @@ export function Wrap({
   const noCaps = analysis.captions === 'none';
   const patch = (key: keyof Masthead, value: string) => onMasthead({ ...masthead, [key]: value });
 
+  const autoFill = () => {
+    let title = analysis.titleZh || analysis.originalTitle || '';
+    if (!whole && picked.length === 1 && analysis.segments[picked[0]]) {
+      title = analysis.segments[picked[0]].title;
+    }
+    onMasthead({
+      title: title.slice(0, 24),
+      kicker: analysis.originalTitle || '',
+      source: analysis.channel || 'Podcast',
+      footerRight: masthead.footerRight || '',
+    });
+  };
+
+  useEffect(() => {
+    if (!masthead.title && !masthead.kicker) {
+      autoFill();
+    }
+  }, [analysis, picked, whole]);
+
   return (
     <section className="sheet">
       <h1>选择段落与刊头</h1>
@@ -50,7 +69,7 @@ export function Wrap({
             整个视频（完整全片）
             {analysis.durationSec > 300 && (
               <span style={{ color: '#e11d48', fontSize: '12px', marginLeft: '8px', fontWeight: 'normal' }}>
-                ⚠️ 视频长达 {Math.round(analysis.durationSec / 60)} 分钟，包含约 {Math.round(analysis.durationSec * 30 / 1000)}k 帧逐帧渲染需数小时，强烈建议取消并改勾下方切片
+                ⚠️ 视频长达 {Math.round(analysis.durationSec / 60)} 分钟，包含约 {Math.round((analysis.durationSec * 30) / 1000)}k 帧逐帧渲染需数小时，强烈建议取消并改勾下方切片
               </span>
             )}
           </h3>
@@ -85,7 +104,16 @@ export function Wrap({
       })}
 
       <div className="section">
-        <h2>刊头四项</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <h2 style={{ margin: 0 }}>刊头四项（已由 AI 自动预填，可直接使用）</h2>
+          <button
+            type="button"
+            style={{ fontSize: '12px', color: '#059669', cursor: 'pointer', background: 'none', border: 'none', padding: '2px 6px' }}
+            onClick={autoFill}
+          >
+            ✨ 恢复 AI 预填
+          </button>
+        </div>
         <div className="field">
           <label>视频主标题</label>
           <input value={masthead.title} onChange={(e) => patch('title', e.target.value)} />

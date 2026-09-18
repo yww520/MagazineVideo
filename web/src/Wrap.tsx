@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { fmtClock } from './format';
 import type { Analysis, Masthead, StyleId } from './types';
 

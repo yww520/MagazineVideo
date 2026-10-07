@@ -22,8 +22,9 @@ import { fetchPreview } from './lib/preview.js';
 import { defaultMasthead } from './lib/masthead.js';
 import { ROOT, jobDir } from './lib/paths.js';
 import { runProduce } from './lib/pipeline.js';
-import { dyShareCopy, xhsShareCopy } from './lib/share-copy.js';
+import { dyShareCopy, sphShareCopy, xhsShareCopy } from './lib/share-copy.js';
 import { prepareDyPublish } from './lib/dy-prepare.js';
+import { prepareSphPublish } from './lib/sph-prepare.js';
 import { prepareXhsPublish } from './lib/xhs-prepare.js';
 import type { Masthead, Selection, StyleId } from './lib/types.js';
 
@@ -214,6 +215,27 @@ app.post('/api/jobs/:id/share/xhs', async (req, res) => {
     res.status(500).json({ error: (err as Error).message || '打开发布页失败' });
   }
 });
+
+app.post('/api/jobs/:id/share/sph', async (req, res) => {
+  const job = getJob(req.params.id);
+  if (!job) return res.status(404).json({ error: '任务不存在' });
+  const production = resolveProduction(job, String(req.body?.production || '') || null);
+  if (!production?.videoPath || !existsSync(production.videoPath)) {
+    return res.status(404).json({ error: '视频尚未生成' });
+  }
+  try {
+    const copy = sphShareCopy(production, job.analysis);
+    const result = await prepareSphPublish({
+      videoPath: production.videoPath,
+      title: copy.title,
+      desc: copy.desc,
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message || '发布到微信视频号失败' });
+  }
+});
+
 
 app.post('/api/jobs/:id/reveal', (req, res) => {
   const job = getJob(req.params.id);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { deleteProduction, prepareDy, prepareXhs, revealFolder, videoUrl } from './api';
+import { deleteProduction, prepareDy, prepareSph, prepareXhs, revealFolder, videoUrl } from './api';
 import { fmtClock, fmtDate, packLabel, selectionClock, STYLE_LABEL } from './format';
 import { go } from './route';
 import type { Analysis, JobPublic, ProductionPublic, Segment } from './types';
@@ -37,17 +37,28 @@ export function Brief({
   const [pending, setPending] = useState<ProductionPublic | null>(null);
   const [busy, setBusy] = useState(false);
   const [sharingId, setSharingId] = useState('');
-  const [sharingTo, setSharingTo] = useState<'xhs' | 'dy' | ''>('');
+  const [sharingTo, setSharingTo] = useState<'xhs' | 'dy' | 'sph' | ''>('');
   const [error, setError] = useState('');
   const [note, setNote] = useState('');
 
-  const shareTo = async (productionId: string, to: 'xhs' | 'dy') => {
+  const shareTo = async (productionId: string, to: 'xhs' | 'dy' | 'sph') => {
     setSharingId(productionId);
     setSharingTo(to);
     setError('');
-    setNote(to === 'xhs' ? '正在打开小红书发布页并上传成片，请不要关掉弹出的窗口…' : '正在打开抖音发布页并上传成片，请不要关掉弹出的窗口…');
+    setNote(
+      to === 'sph'
+        ? '正在通过 Tabbit 浏览器上传并发布到微信视频号，请稍候…'
+        : to === 'xhs'
+          ? '正在打开小红书发布页并上传成片，请不要关掉弹出的窗口…'
+          : '正在打开抖音发布页并上传成片，请不要关掉弹出的窗口…'
+    );
     try {
-      const result = to === 'xhs' ? await prepareXhs(jobId, productionId) : await prepareDy(jobId, productionId);
+      const result =
+        to === 'sph'
+          ? await prepareSph(jobId, productionId)
+          : to === 'xhs'
+            ? await prepareXhs(jobId, productionId)
+            : await prepareDy(jobId, productionId);
       setNote(result.message);
     } catch (err) {
       setNote('');
@@ -293,9 +304,9 @@ function PackFold({
   analysis: Analysis;
   open: boolean;
   sharing: boolean;
-  sharingTo: 'xhs' | 'dy' | '';
+  sharingTo: 'xhs' | 'dy' | 'sph' | '';
   onToggle: () => void;
-  onShare: (to: 'xhs' | 'dy') => void;
+  onShare: (to: 'xhs' | 'dy' | 'sph') => void;
   onDelete: () => void;
 }) {
   const points = pointsForProduction(production, analysis);
@@ -323,6 +334,9 @@ function PackFold({
           </button>
         </div>
         <div className="acts">
+          <button className="act" type="button" disabled={sharing} onClick={() => onShare('sph')}>
+            {sharingTo === 'sph' ? '发布中…' : '视频号'}
+          </button>
           <button className="act" type="button" disabled={sharing} onClick={() => onShare('xhs')}>
             {sharingTo === 'xhs' ? '打开中…' : '小红书'}
           </button>

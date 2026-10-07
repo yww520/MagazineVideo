@@ -46,3 +46,12 @@ export const xhsShareCopy = (production: Production, analysis?: Analysis) =>
 
 export const dyShareCopy = (production: Production, analysis?: Analysis) =>
   buildShareCopy(production, analysis, 30, 1000);
+
+export const sphShareCopy = (production: Production, analysis?: Analysis) => {
+  const shortTitle = clipLine(packTitle(production, analysis), 16);
+  const copy = buildShareCopy(production, analysis, 30, 850);
+  const tags = ['#英文播客', '#商业思考', '#深度访谈', '#双语精读'];
+  const desc = `${copy.desc}\n\n${tags.join(' ')}`;
+  return { title: shortTitle, desc };
+};
+

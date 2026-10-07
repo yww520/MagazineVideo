@@ -50,8 +50,8 @@ export const deleteProduction = (id: string, production: string) =>
     fetch(`/api/jobs/${id}/productions/${encodeURIComponent(production)}`, { method: 'DELETE' }),
   );
 
-const prepareShare = (id: string, production: string | undefined, to: 'xhs' | 'dy') =>
-  parse<{ ok: boolean; needLogin?: boolean; message: string }>(
+const prepareShare = (id: string, production: string | undefined, to: 'xhs' | 'dy' | 'sph') =>
+  parse<{ ok: boolean; needLogin?: boolean; published?: boolean; message: string }>(
     fetch(`/api/jobs/${id}/share/${to}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -61,6 +61,7 @@ const prepareShare = (id: string, production: string | undefined, to: 'xhs' | 'd
 
 export const prepareXhs = (id: string, production?: string) => prepareShare(id, production, 'xhs');
 export const prepareDy = (id: string, production?: string) => prepareShare(id, production, 'dy');
+export const prepareSph = (id: string, production?: string) => prepareShare(id, production, 'sph');
 
 export const revealFolder = (id: string, production?: string) =>
   parse<{ ok: boolean; path: string }>(
